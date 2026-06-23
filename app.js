@@ -79,6 +79,7 @@ const DOM = {
     pageDesc: null,
 
     // Simulator Tab Inputs
+    driverProfileSelect: null,
     tripWeeksContainer: null,
     driverNameInput: null,
     driverTenure: null,
@@ -174,6 +175,7 @@ function cacheStaticElements() {
     DOM.pageTitle = document.getElementById("page-title");
     DOM.pageDesc = document.getElementById("page-desc");
 
+    DOM.driverProfileSelect = document.getElementById("driver-profile-select");
     DOM.tripWeeksContainer = document.getElementById("trip-weeks-container");
     DOM.driverNameInput = document.getElementById("driver-name-input");
     DOM.driverTenure = document.getElementById("driver-tenure");
@@ -656,14 +658,30 @@ function generateWeeksInputs() {
 }
 
 function populateDriverDropdown() {
-    const select = DOM.driverActiveSelect;
-    select.innerHTML = "";
-    DRIVERS.forEach(d => {
-        const opt = document.createElement("option");
-        opt.value = d.id;
-        opt.innerText = `${d.name} (${d.dormancy >= 30 ? 'Dormant ' + d.dormancy + 'd' : 'Tenure: ' + d.tenure + 'mo'})`;
-        select.appendChild(opt);
-    });
+    const selectActive = DOM.driverActiveSelect;
+    const selectProfile = DOM.driverProfileSelect;
+    
+    if (selectActive) {
+        selectActive.innerHTML = "";
+        DRIVERS.forEach(d => {
+            const opt = document.createElement("option");
+            opt.value = d.id;
+            opt.innerText = `${d.name} (${d.dormancy >= 30 ? 'Dormant ' + d.dormancy + 'd' : 'Tenure: ' + d.tenure + 'mo'})`;
+            selectActive.appendChild(opt);
+        });
+        selectActive.value = selectedDriver.id;
+    }
+    
+    if (selectProfile) {
+        selectProfile.innerHTML = "";
+        DRIVERS.forEach(d => {
+            const opt = document.createElement("option");
+            opt.value = d.id;
+            opt.innerText = `${d.name} (${d.dormancy >= 30 ? 'Dormant ' + d.dormancy + 'd' : 'Tenure: ' + d.tenure + 'mo'})`;
+            selectProfile.appendChild(opt);
+        });
+        selectProfile.value = selectedDriver.id;
+    }
 }
 
 function renderMobileQuestSelector() {
@@ -1244,6 +1262,17 @@ function initDriverSimulator() {
     generateWeeksInputs();
     populateSimulatorFields(selectedDriver);
 
+    if (DOM.driverProfileSelect) {
+        DOM.driverProfileSelect.addEventListener("change", (e) => {
+            const driverId = e.target.value;
+            if (DOM.driverActiveSelect) {
+                DOM.driverActiveSelect.value = driverId;
+            }
+            triggerDriverSync(driverId);
+            populateSimulatorFields(selectedDriver);
+        });
+    }
+
     DOM.calculateThresholdsBtn.addEventListener("click", () => {
         readSimulatorInputsAndCalculate();
     });
@@ -1256,7 +1285,8 @@ function initDriverSimulator() {
             DRIVERS[index] = { ...selectedDriver };
         }
         populateDriverDropdown();
-        select.value = selectedDriver.id;
+        if (select) select.value = selectedDriver.id;
+        if (DOM.driverProfileSelect) DOM.driverProfileSelect.value = selectedDriver.id;
         triggerDriverSync(selectedDriver.id);
         
         DOM.navButtons.forEach(btn => {
@@ -1347,9 +1377,16 @@ function initExperimentDesigner() {
 function initDriverAppSandbox() {
     populateDriverDropdown();
 
-    DOM.driverActiveSelect.addEventListener("change", (e) => {
-        triggerDriverSync(e.target.value);
-    });
+    if (DOM.driverActiveSelect) {
+        DOM.driverActiveSelect.addEventListener("change", (e) => {
+            const driverId = e.target.value;
+            if (DOM.driverProfileSelect) {
+                DOM.driverProfileSelect.value = driverId;
+            }
+            triggerDriverSync(driverId);
+            populateSimulatorFields(selectedDriver);
+        });
+    }
 
     DOM.sliderCompletedTrips.addEventListener("input", (e) => {
         completedTrips = parseInt(e.target.value);
@@ -1370,7 +1407,9 @@ function initDriverAppSandbox() {
         handleDriverGPSChange(e.target.value);
     });
     
-    triggerDriverSync(DOM.driverActiveSelect.value);
+    if (DOM.driverActiveSelect) {
+        triggerDriverSync(DOM.driverActiveSelect.value);
+    }
 }
 
 function readSimulatorInputsAndCalculate() {
