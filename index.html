@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DriverIQ — Bolt Spatial & Adaptive Incentives</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="light-theme">
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo-area">
+                <svg viewBox="0 0 100 100" width="42" height="42" class="bolt-logo-svg">
+                    <circle cx="50" cy="50" r="48" fill="#00CA65"/>
+                    <g transform="translate(3, 27.25)">
+                        <!-- B -->
+                        <path d="M12,5 h8 c5,0 8.5,2.5 8.5,6.5 c0,2.8 -1.8,4.8 -4.5,5.5 c3,0.8 5,2.8 5,6 c0,4.5 -3.5,7.5 -9,7.5 h-8 V5 Z M17.5,14 h3 c2,0 3.2,-0.8 3.2,-2.2 c0,-1.5 -1.2,-2.2 -3.2,-2.2 h-3 V14 Z M17.5,26.5 h3.5 c2,0 3.5,-0.8 3.5,-2.3 c0,-1.5 -1.5,-2.2 -3.5,-2.2 h-3 V26.5 Z" fill="#FFFFFF"/>
+                        <!-- o -->
+                        <circle cx="44" cy="20.5" r="6.5" stroke="#FFFFFF" stroke-width="4.5" fill="none"/>
+                        <!-- l -->
+                        <rect x="57" y="5" width="4.5" height="25" rx="1" fill="#FFFFFF"/>
+                        <!-- t -->
+                        <path d="M70,11 v3.5 h-2.5 v4 h2.5 v6.5 c0,3 1.8,4.5 4.5,4.5 c1,0 1.8,-0.1 2.2,-0.4 v-3.5 c-0.2,0.1 -0.5,0.1 -0.8,0.1 c-1,0 -1.4,-0.5 -1.4,-1.4 v-5.8 h2.2 v-4 h-2.2 v-3.5 H70 Z" fill="#FFFFFF"/>
+                        <!-- Dot below o -->
+                        <circle cx="44" cy="36.5" r="4" fill="#FFFFFF"/>
+                    </g>
+                </svg>
+                <span class="app-tag">DriverIQ v2</span>
+            </div>
+            <nav class="nav-menu">
+                <button class="nav-btn active" data-tab="simulator-tab">
+                    <span class="nav-icon">👤</span> Driver Simulator
+                </button>
+                <button class="nav-btn" data-tab="roi-tab">
+                    <span class="nav-icon">📊</span> ROI & P&L Model
+                </button>
+                <button class="nav-btn" data-tab="experiment-tab">
+                    <span class="nav-icon">🧪</span> Experiment Designer
+                </button>
+                <button class="nav-btn" data-tab="driver-app-tab">
+                    <span class="nav-icon">📱</span> Driver App Viewport
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="status-badge">
+                    <span class="status-dot green"></span>
+                    <span>State: Step 6 (Code Gen - V2)</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Dashboard Area -->
+        <main class="main-content">
+            <header class="top-header">
+                <h1 id="page-title">Driver Simulator</h1>
+                <p id="page-desc">Simulate a driver's historical trip volume and calculate personalized incentive quest thresholds.</p>
+            </header>
+
+            <!-- Tab Content Container -->
+            <div class="tab-content-container">
+                
+                <!-- TAB 1: DRIVER SIMULATOR -->
+                <section id="simulator-tab" class="tab-panel active">
+                    <div class="grid-2col">
+                        <!-- Driver Inputs -->
+                        <div class="card glass-card">
+                            <h2 class="card-title">Driver Profile & History Input</h2>
+                            <div class="form-group">
+                                <label for="driver-name-input">Driver Name / ID</label>
+                                <input type="text" id="driver-name-input" value="Alex K. (Helsinki)" placeholder="Enter name">
+                            </div>
+                            <div class="form-group">
+                                <label>12-Week Completed Trip History (trips/week)</label>
+                                <div class="trip-weeks-grid" id="trip-weeks-container">
+                                    <!-- Inputs generated dynamically by JS -->
+                                </div>
+                                <span class="help-text">Input trips per week. Baseline target is based on 85th percentile of these values.</span>
+                            </div>
+                            <div class="form-group row-group">
+                                <div>
+                                    <label for="driver-tenure">Tenure (months)</label>
+                                    <input type="number" id="driver-tenure" value="14" min="1">
+                                </div>
+                                <div>
+                                    <label for="driver-rating">Rating (★)</label>
+                                    <input type="number" id="driver-rating" value="4.85" step="0.05" min="1" max="5">
+                                </div>
+                            </div>
+                            <div class="form-group row-group">
+                                <div>
+                                    <label for="driver-dormancy">Days Inactive</label>
+                                    <input type="number" id="driver-dormancy" value="0" min="0">
+                                </div>
+                                <div>
+                                    <label for="driver-hourly-yield">Median Hourly Yield (€/hr)</label>
+                                    <input type="number" id="driver-hourly-yield" value="24" min="10" max="60">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="gaming-flag-input">
+                                    <span>Simulate "Gaming Driver" (intentional trip drop of &ge;2 weeks)</span>
+                                </label>
+                            </div>
+                            <button id="calculate-thresholds-btn" class="btn btn-primary">Generate Quest Thresholds</button>
+                        </div>
+
+                        <!-- Simulator Results -->
+                        <div class="card glass-card result-card">
+                            <h2 class="card-title">Adaptive Threshold Engine Outputs</h2>
+                            <div class="stats-grid">
+                                <div class="stat-box">
+                                    <span class="stat-label">4-Week Average</span>
+                                    <span class="stat-value" id="stat-4week-avg">0</span>
+                                </div>
+                                <div class="stat-box">
+                                    <span class="stat-label">85th Percentile Target</span>
+                                    <span class="stat-value" id="stat-85p">0</span>
+                                </div>
+                                <div class="stat-box">
+                                    <span class="stat-label">Anti-Gaming Lock</span>
+                                    <span class="stat-value text-red" id="stat-gaming-status">CLEAN</span>
+                                </div>
+                            </div>
+
+                            <h3 class="sub-title">Calculated Quest Offers</h3>
+                            <div class="quest-offers-comparison" id="quest-offers-wrapper">
+                                <!-- Generated dynamically by app.js (Standard Quests or Progressive Reactivation Ladder) -->
+                            </div>
+                            
+                            <div class="action-bar mt-20">
+                                <button id="sync-to-driver-btn" class="btn btn-secondary w-full">⚡ Sync Selected Driver to Mobile Viewport</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 2: ROI MODEL -->
+                <section id="roi-tab" class="tab-panel">
+                    <div class="grid-2col">
+                        <!-- ROI Inputs -->
+                        <div class="card glass-card">
+                            <h2 class="card-title">Incentive P&L & Yield Settings</h2>
+                            <div class="form-group">
+                                <label for="slider-baseline-trips">Weekly Trip Volume (City Baseline)</label>
+                                <div class="slider-container">
+                                    <input type="range" id="slider-baseline-trips" min="10000" max="500000" step="5000" value="100000">
+                                    <span class="slider-val" id="val-baseline-trips">100,000</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="slider-static-quest-payout">Standard Quest Payout per Driver (€)</label>
+                                <div class="slider-container">
+                                    <input type="range" id="slider-static-quest-payout" min="10" max="150" step="5" value="40">
+                                    <span class="slider-val" id="val-static-quest-payout">€40</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="slider-adaptive-quest-payout">Adaptive Quest Avg Payout (€)</label>
+                                <div class="slider-container">
+                                    <input type="range" id="slider-adaptive-quest-payout" min="10" max="150" step="5" value="38">
+                                    <span class="slider-val" id="val-adaptive-quest-payout">€38</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="slider-static-completion-rate">Control Quest Completion Rate (%)</label>
+                                <div class="slider-container">
+                                    <input type="range" id="slider-static-completion-rate" min="10" max="90" step="1" value="43">
+                                    <span class="slider-val" id="val-static-completion-rate">43%</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="slider-adaptive-completion-rate">Treatment Quest Completion Rate (%)</label>
+                                <div class="slider-container">
+                                    <input type="range" id="slider-adaptive-completion-rate" min="10" max="90" step="1" value="58">
+                                    <span class="slider-val" id="val-adaptive-completion-rate">58%</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="slider-incremental-lift">Adaptive Trip Lift (%)</label>
+                                <div class="slider-container">
+                                    <input type="range" id="slider-incremental-lift" min="1" max="30" step="0.5" value="10">
+                                    <span class="slider-val" id="val-incremental-lift">10.0%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ROI Analysis -->
+                        <div class="card glass-card result-card">
+                            <h2 class="card-title">Financial Yield & Efficiency Metrics</h2>
+                            <div class="roi-comparison-grid">
+                                <div class="roi-comparison-card control">
+                                    <h4>Control Regime (Static Quests)</h4>
+                                    <div class="roi-value" id="roi-control-spend">€1,720,000</div>
+                                    <div class="roi-label">Total Incentive Spend / Wk</div>
+                                    <div class="divider"></div>
+                                    <div class="roi-sub-value" id="roi-control-trips">0</div>
+                                    <div class="roi-label">Total Trips / Wk</div>
+                                    <div class="divider"></div>
+                                    <div class="roi-value-small" id="roi-control-cpit">€4.00</div>
+                                    <div class="roi-label">Cost per Incremental Trip (CpIT)</div>
+                                </div>
+                                <div class="roi-comparison-card treatment">
+                                    <h4>Treatment Regime (Adaptive Quests)</h4>
+                                    <div class="roi-value" id="roi-treatment-spend">€2,204,000</div>
+                                    <div class="roi-label">Total Incentive Spend / Wk</div>
+                                    <div class="divider"></div>
+                                    <div class="roi-sub-value" id="roi-treatment-trips">0</div>
+                                    <div class="roi-label">Total Trips / Wk</div>
+                                    <div class="divider"></div>
+                                    <div class="roi-value-small text-green" id="roi-treatment-cpit">€3.52</div>
+                                    <div class="roi-label">Cost per Incremental Trip (CpIT)</div>
+                                </div>
+                            </div>
+                            <div class="roi-summary-message mt-20" id="roi-message">
+                                <!-- Generated message -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 3: EXPERIMENT DESIGNER -->
+                <section id="experiment-tab" class="tab-panel">
+                    <div class="grid-2col">
+                        <!-- Design Parameters -->
+                        <div class="card glass-card">
+                            <h2 class="card-title">A/B Holdout & Switchback Settings</h2>
+                            <div class="form-group">
+                                <label for="exp-market">Target City Market</label>
+                                <select id="exp-market" class="form-select">
+                                    <option value="Helsinki">Helsinki (Baseline SFR: 94.2%)</option>
+                                    <option value="Tallinn">Tallinn (Baseline SFR: 95.8%)</option>
+                                    <option value="London">London (Baseline SFR: 91.5%)</option>
+                                    <option value="Warsaw">Warsaw (Baseline SFR: 93.1%)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="slider-sample-size">Total Cohort Size (Drivers)</label>
+                                <div class="slider-container">
+                                    <input type="range" id="slider-sample-size" min="1000" max="100000" step="1000" value="15000">
+                                    <span class="slider-val" id="val-sample-size">15,000</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="slider-split">Treatment Split Ratio (%)</label>
+                                <div class="slider-container">
+                                    <input type="range" id="slider-split" min="50" max="95" step="5" value="80">
+                                    <span class="slider-val" id="val-split">80% Treatment / 20% Holdout</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="slider-mde">Expected Minimum Detectable Effect (MDE %)</label>
+                                <div class="slider-container">
+                                    <input type="range" id="slider-mde" min="1" max="15" step="0.5" value="5">
+                                    <span class="slider-val" id="val-mde">5.0%</span>
+                                </div>
+                            </div>
+                            <div class="form-group row-group">
+                                <div>
+                                    <label for="exp-significance">Significance Level (&alpha;)</label>
+                                    <select id="exp-significance" class="form-select">
+                                        <option value="0.01">0.01 (99% Conf)</option>
+                                        <option value="0.05" selected>0.05 (95% Conf)</option>
+                                        <option value="0.10">0.10 (90% Conf)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="exp-power">Target Statistical Power (1-&beta;)</label>
+                                    <select id="exp-power" class="form-select">
+                                        <option value="0.80" selected>0.80 (Standard)</option>
+                                        <option value="0.90">0.90 (High)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Experiment Analytics -->
+                        <div class="card glass-card result-card">
+                            <h2 class="card-title">Power Analysis & Validation Report</h2>
+                            <div class="stats-grid">
+                                <div class="stat-box">
+                                    <span class="stat-label">Treatment Group</span>
+                                    <span class="stat-value" id="stat-treatment-n">12,000</span>
+                                    <span class="stat-sub">Drivers</span>
+                                </div>
+                                <div class="stat-box">
+                                    <span class="stat-label">Control Holdout Group</span>
+                                    <span class="stat-value" id="stat-control-n">3,000</span>
+                                    <span class="stat-sub">Drivers</span>
+                                </div>
+                                <div class="stat-box">
+                                    <span class="stat-label">Required N for MDE</span>
+                                    <span class="stat-value" id="stat-required-n">12,450</span>
+                                    <span class="stat-sub" id="stat-power-verdict">Sufficient</span>
+                                </div>
+                            </div>
+
+                            <div class="simulation-chart-box">
+                                <h3 class="sub-title">Statistical Power Confidence Distribution</h3>
+                                <div class="canvas-container">
+                                    <canvas id="powerChart" width="400" height="150"></canvas>
+                                </div>
+                            </div>
+                            
+                            <div class="alert-box" id="exp-alert">
+                                <strong>Safety Status:</strong> Guardrail SFR is currently healthy at <span id="exp-sfr-value">94.2%</span>.
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 4: DRIVER APP VIEWPORT -->
+                <section id="driver-app-tab" class="tab-panel">
+                    <div class="driver-app-sandbox">
+                        
+                        <!-- Driver Control Board -->
+                        <div class="card glass-card">
+                            <h2 class="card-title">Driver App Control Board</h2>
+                            <p class="section-desc">Simulate a driver's active week behavior. Complete trips, select spatial coordinates, and track P&L rules.</p>
+                            
+                            <div class="form-group">
+                                <label for="driver-active-select">Active Driver Profile</label>
+                                <select id="driver-active-select" class="form-select">
+                                    <!-- Dynamic options -->
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Simulate Weekly Trip Completion</label>
+                                <div class="slider-container">
+                                    <input type="range" id="slider-completed-trips" min="0" max="40" value="0">
+                                    <span class="slider-val" id="val-completed-trips">0 completed trips</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="driver-sim-coordinate">Simulated Driver Position (GPS Hexagon)</label>
+                                <select id="driver-sim-coordinate" class="form-select">
+                                    <option value="H3-8512">Hex H3-8512 (Suburban Area - No Surge)</option>
+                                    <option value="H3-8513">Hex H3-8513 (Helsinki Central - Active Surge +€3.00)</option>
+                                    <option value="H3-8514">Hex H3-8514 (Helsinki East - Border H3 adjacent)</option>
+                                    <option value="H3-8515">Hex H3-8515 (Helsinki North - Out of Bounds)</option>
+                                </select>
+                                <span class="help-text">Moving to Hex H3-8513 registers client-side geofencing and triggers the 15-min Price Lock.</span>
+                            </div>
+
+                            <div class="form-group row-group">
+                                <div>
+                                    <label for="driver-sim-day">Active Weekday</label>
+                                    <select id="driver-sim-day" class="form-select">
+                                        <option value="Monday">Monday</option>
+                                        <option value="Wednesday">Wednesday</option>
+                                        <option value="Friday">Friday</option>
+                                        <option value="Sunday">Sunday</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="driver-sim-hour">Active Hour</label>
+                                    <select id="driver-sim-hour" class="form-select">
+                                        <option value="09:00">09:00 AM (Morning Peak)</option>
+                                        <option value="12:00" selected>12:00 PM (Mid-Day)</option>
+                                        <option value="18:00">06:00 PM (Evening Peak)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mobile Device Mockup -->
+                        <div class="mobile-device-wrapper">
+                            <div class="phone-frame">
+                                <div class="phone-notch"></div>
+                                <div class="phone-screen">
+                                    <!-- Phone Header / Status Bar -->
+                                    <div class="phone-status-bar">
+                                        <span class="phone-time" id="mock-phone-time">12:00</span>
+                                        <div class="phone-network-icons">
+                                            <div class="phone-signal">
+                                                <span class="bar"></span>
+                                                <span class="bar"></span>
+                                                <span class="bar"></span>
+                                                <span class="bar"></span>
+                                            </div>
+                                            <svg class="phone-wifi" viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
+                                                <path d="M12 21a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm0-6.2c-2.3 0-4.3-.9-5.8-2.4l1.4-1.4a6.2 6.2 0 0 1 8.8 0l1.4 1.4c-1.5 1.5-3.5 2.4-5.8 2.4Zm0-5.6a11.9 11.9 0 0 0-8.6-3.6l1.4-1.4A10 10 0 0 1 12 7.2a10 10 0 0 1 7.2-3l1.4 1.4A11.9 11.9 0 0 0 12 9.2Z"/>
+                                            </svg>
+                                            <div class="phone-battery">
+                                                <div class="battery-body">
+                                                    <div class="battery-fill"></div>
+                                                </div>
+                                                <div class="battery-cap"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Phone In-App Content -->
+                                    <div class="phone-app-content" id="phone-app-view">
+                                        <!-- Views dynamically swapped by app.js -->
+                                    </div>
+
+                                    <!-- Push Notification Drawer (Overlay) -->
+                                    <div class="notification-drawer" id="notification-drawer">
+                                        <div class="drawer-header">
+                                            <span>DriverIQ Active Coach</span>
+                                            <button class="close-drawer-btn" id="close-drawer-btn">&times;</button>
+                                        </div>
+                                        <div class="drawer-content" id="notification-content">
+                                            No active nudges.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>
